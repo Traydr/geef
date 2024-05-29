@@ -66,11 +66,6 @@ fun Application.configureRouting() {
                 databasePage()
             }
         }
-        get("/ext-api") {
-            call.respondHtml(HttpStatusCode.OK) {
-                ApiPage()
-            }
-        }
         get("/healthcheck") {
             call.respond(HttpStatusCode.OK)
         }
