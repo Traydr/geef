@@ -1,12 +1,6 @@
 package dev.traydr.geef.web
 
-import com.openmeteo.api.Forecast
-import com.openmeteo.api.OpenMeteo
-import com.openmeteo.api.common.Response
-import com.openmeteo.api.common.time.Timezone
-import com.openmeteo.api.common.units.TemperatureUnit
 import dev.traydr.geef.domain.GlobalPair
-import dev.traydr.geef.domain.exceptions.LocationNotFoundException
 import dev.traydr.geef.domain.exceptions.UnsupportedFileExtensionException
 import dev.traydr.geef.domain.service.GlobalPairsService
 import dev.traydr.geef.domain.service.TokenService
@@ -83,59 +77,6 @@ fun Application.configureRouting() {
     }
     // API routes
     routing {
-        @OptIn(Response.ExperimentalGluedUnitTimeStepValues::class)
-        get("/api/v1/ext") {
-            call.respondHtml {
-                val location: String = call.request.queryParameters["location"] ?: ""
-                val om = OpenMeteo(location, "en")
-                val forecast = om.forecast {
-                    daily = Forecast.Daily {
-                        listOf(temperature2mMin, temperature2mMax)
-                    }
-                    temperatureUnit = TemperatureUnit.Celsius
-                    timezone = Timezone.auto
-                }.getOrElse {
-                    throw LocationNotFoundException("Could not find $location")
-                }
-
-                body {
-                    Forecast.Daily.run {
-                        val minTemp = forecast.daily.getValue(temperature2mMin)
-
-                        forecast.daily.getValue(temperature2mMax).run {
-                            div {
-                                classes = setOf("overflow-x-auto", "p-4")
-                                table {
-                                    classes = setOf("table", "table-zebra")
-                                    thead {
-                                        tr {
-                                            th { +"Date" }
-                                            th { +"Max Temp (C)" }
-                                            th { +"Min Temp (C)" }
-                                        }
-                                    }
-                                    tbody {
-                                        values.forEach{ (t, v) ->
-                                            tr {
-                                                td {
-                                                    +"$t"
-                                                }
-                                                td {
-                                                    +"$v"
-                                                }
-                                                td {
-                                                    +"${minTemp.values[t]}"
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
         get("/api/v1/global") {
             val key: String = call.request.queryParameters["key"].toString()
             val pair: GlobalPair? = globalPairsService.get(key)
