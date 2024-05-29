@@ -51,13 +51,18 @@ fun Application.module() {
     }
 
     val postgresIp = System.getenv("PG_IP")?: "0.0.0.0"
+    val postgresPort = System.getenv("PG_PORT")?: "5432"
     val postgresUsername = System.getenv("PG_USERNAME")?: "postgres"
     val postgresPassword = System.getenv("PG_PASSWORD")?: ""
     DbConfig.setup(
-        "jdbc:postgresql://$postgresIp:5432/postgres",
+        "jdbc:postgresql://$postgresIp:$postgresPort/postgres",
         postgresUsername,
         postgresPassword
     )
+
+    val minioUrl = System.getenv("MINIO_URL")?: "0.0.0.0"
+    val minioUsername = System.getenv("MINIO_USERNAME")?: "minio"
+    val minioPassword = System.getenv("MINIO_PASSWORD")?: ""
 
     configureSecurity()
     configureSerialization()
