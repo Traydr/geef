@@ -2,7 +2,7 @@
 
 ## Description
 
-A image upload service. One which also displays other people images and lets them see yours.
+An image upload service. One which also displays other people images and lets them see yours.
 
 ## Requirements
 
