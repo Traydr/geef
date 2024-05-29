@@ -1,18 +1,21 @@
-# Ktor example web app
+# Geef
 
-Using this to showcase and experiment with what is possible in ktor.
+## Description
 
-This includes:
+A image upload service. One which also displays other people images and lets them see yours.
 
-- Connection with a database and using kotlin's exposed framework with hikari as the connection pool
-- Saving files to the local drive
-- Kotlin's Html DSL (kotlinx) and templating
+## Requirements
 
-## Useful Resources
+### Task
 
-- https://ktor.io/docs/server-auth.html#supported
-- https://ktor.io/docs/server-session-auth.html#save-session
-- https://jetbrains.github.io/Exposed/deep-dive-into-dao.html#referencing
-- https://jetbrains.github.io/Exposed/data-types.html
-- https://github.com/Rudge/kotlin-ktor-realworld-example-app
-- https://insert-koin.io/docs/reference/koin-ktor/ktor
+On the back-end there is a graphical file storage with photos and a database that records which user
+uploaded which file. The website should display a list of users. When a user is selected, thumbnails
+of their uploaded files should be displayed.
+
+### Recommended Technologies
+
+REST web services
+
+### System Capabilities
+
+up to 300 users. Up to 50 files per user.
