@@ -17,7 +17,7 @@ plugins {
     id("org.jetbrains.kotlin.plugin.serialization") version "1.9.23"
 }
 
-group = "dev.traydr.vu"
+group = "dev.traydr.geef"
 version = "0.0.1"
 
 tailwind {
@@ -28,10 +28,10 @@ tailwind {
 }
 
 application {
-    mainClass.set("dev.traydr.ktor.ApplicationKt")
+    mainClass.set("dev.traydr.geef.ApplicationKt")
 
     val isDevelopment: Boolean = providers.environmentVariable("DEV").isPresent
-    applicationDefaultJvmArgs = listOf("-Dio.ktor.development=$isDevelopment")
+    applicationDefaultJvmArgs = listOf("-Dio.geef.development=$isDevelopment")
 }
 
 ktor {
