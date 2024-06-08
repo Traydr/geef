@@ -34,7 +34,9 @@ up to 300 users. Up to 50 files per user.
   - [ ] Signup / Login
   - [ ] Profile
     - [ ] Able to see all the images a person has uploaded
-    - [ ] On your own profile, you are able to delete images 
+    - [ ] On your own profile, you are able to delete images
+    - [ ] /profile gets your own profile
+    - [ ] /profile/{public_user_id} gets someone else's profile
   - [ ] Discovery page (List of users)
 - [ ] APIs
   - [ ] Auth endpoints
