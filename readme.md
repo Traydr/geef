@@ -19,3 +19,22 @@ REST web services
 ### System Capabilities
 
 up to 300 users. Up to 50 files per user.
+
+## Remaining Tasks
+
+### Required
+- [ ] Connect Minio and save files to it
+- [ ] Update postgres db with:
+  - [ ] Table for files
+  - [ ] Table for showing which user owns the files and any metadata
+  - [ ] Table for profiles
+- [ ] Make sure auth is working w/ cookies and authenticate pages
+- [ ] Make HTML pages for:
+  - [ ] Home
+  - [ ] Signup / Login
+  - [ ] Profile (dual-purpose for seeing your own images)
+  - [ ] Discovery page (List of users)
+
+### Optional:
+- [ ] Optimizing images
+- [ ] Following other users
