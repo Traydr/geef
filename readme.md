@@ -31,7 +31,8 @@ up to 300 users. Up to 50 files per user.
 - [ ] Make sure auth is working w/ cookies and authenticate pages
 - [ ] Frontend
   - [ ] Home
-  - [ ] Signup / Login
+  - [ ] Signup / Login / Logout
+    - [ ] Possibly in navbar / logout is only shown if user is logged in
   - [ ] Profile
     - [ ] Able to see all the images a person has uploaded
     - [ ] On your own profile, you are able to delete images
