@@ -29,11 +29,19 @@ up to 300 users. Up to 50 files per user.
   - [ ] Table for showing which user owns the files and any metadata
   - [ ] Table for profiles
 - [ ] Make sure auth is working w/ cookies and authenticate pages
-- [ ] Make HTML pages for:
+- [ ] Frontend
   - [ ] Home
   - [ ] Signup / Login
-  - [ ] Profile (dual-purpose for seeing your own images)
+  - [ ] Profile
+    - [ ] Able to see all the images a person has uploaded
+    - [ ] On your own profile, you are able to delete images 
   - [ ] Discovery page (List of users)
+- [ ] APIs
+  - [ ] Auth endpoints
+  - [ ] Modify or rewrite image endpoints
+  - [ ] Get all users / link profiles
+  - [ ] Return components of all the images
+  - [ ] For profiles return some profile data
 
 ### Optional:
 - [ ] Optimizing images
