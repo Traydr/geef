@@ -4,8 +4,10 @@ import dev.traydr.geef.domain.User
 import org.jetbrains.exposed.dao.id.LongIdTable
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
+import java.util.UUID
 
 internal object Users : LongIdTable() {
+    val publicUUID: Column<String> = varchar("public_uuid", 36).uniqueIndex()
     val email: Column<String> = varchar("email", 200).uniqueIndex()
     val username: Column<String> = varchar("username", 100).uniqueIndex()
     val password: Column<String> = varchar("password", 150)
@@ -14,6 +16,7 @@ internal object Users : LongIdTable() {
     fun toDomain(row: ResultRow): User {
         return User(
             id = row[Users.id].value,
+            publicUUID = row[publicUUID],
             email = row[email],
             username = row[username],
             password = row[password],
@@ -52,13 +55,14 @@ class UserRepository {
         }
     }
 
-    fun create(user: User): Long? {
+    fun create(user: User): Long {
         return transaction {
             Users.insertAndGetId { row ->
                 row[email] = user.email
                 row[username] = user.username!!
                 row[password] = user.password!!
                 row[bio] = user.bio
+                row[publicUUID] = UUID.randomUUID().toString()
             }.value
         }
     }
