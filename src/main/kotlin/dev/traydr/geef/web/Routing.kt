@@ -50,16 +50,6 @@ fun Application.configureRouting() {
                 indexPage()
             }
         }
-        get("/images") {
-            call.respondHtml(HttpStatusCode.OK) {
-                imagePage()
-            }
-        }
-        get("/db") {
-            call.respondHtml(HttpStatusCode.OK) {
-                databasePage()
-            }
-        }
         get("/healthcheck") {
             call.respond(HttpStatusCode.OK)
         }
@@ -77,109 +67,60 @@ fun Application.configureRouting() {
     }
     // API routes
     routing {
-        get("/api/v1/global") {
-            val key: String = call.request.queryParameters["key"].toString()
-            val pair: GlobalPair? = globalPairsService.get(key)
-            call.respondHtml {
-                body {
-                    div {
-                        if (pair != null) {
-                            +"$key : ${pair.value}"
-                        } else {
-                            +"$key does not have a pair"
-                        }
-                    }
-                }
-            }
-        }
-        post("/api/v1/global") {
-            val params = call.receiveParameters()
-            val key: String = params["key"].toString()
-            val value: String = params["value"].toString()
+        route("/api/v1/") {
+            post("upload") {
+                var fileDescription = ""
+                var fileName = ""
+                val multipartData = call.receiveMultipart()
 
-            if (key.isEmpty() || value.isEmpty()) {
-                call.respond(HttpStatusCode.BadRequest, "Key or Value is missing")
-            } else if (key.length > 255 || value.length > 255) {
-                call.respond(HttpStatusCode.BadRequest, "Key or Value is above char limit")
-            }
-
-            globalPairsService.create(key, Jsoup.clean(value, Safelist.none()))
-            call.respondHtml(HttpStatusCode.OK) {
-                body {
-                    gsFormPost()
-                }
-            }
-        }
-        put("/api/v1/global") {
-            val params = call.receiveParameters()
-            val key: String = params["key"].toString()
-            val value: String = params["value"].toString()
-
-            if (key.isEmpty() || value.isEmpty()) {
-                call.respond(HttpStatusCode.BadRequest, "Key or Value is missing")
-            } else if (key.length > 255 || value.length > 255) {
-                call.respond(HttpStatusCode.BadRequest, "Key or Value is above char limit")
-            }
-
-            globalPairsService.update(key, Jsoup.clean(value, Safelist.none()))
-            call.respondHtml(HttpStatusCode.OK) {
-                body {
-                    gsFormPut()
-                }
-            }
-        }
-        post("/api/v1/upload") {
-            var fileDescription = ""
-            var fileName = ""
-            val multipartData = call.receiveMultipart()
-
-            try {
-                multipartData.forEachPart { partData ->
-                    when (partData) {
-                        is PartData.FormItem -> {
-                            fileDescription = partData.value
-                        }
-
-                        is PartData.FileItem -> {
-                            val fileBytes = partData.streamProvider().readBytes()
-                            val fileExtension =
-                                partData.originalFileName?.takeLastWhile { it != '.' }
-
-                            if (!acceptedUploadExtension.contains(fileExtension)) {
-                                throw UnsupportedFileExtensionException("File extension '$fileExtension' is not supported")
+                try {
+                    multipartData.forEachPart { partData ->
+                        when (partData) {
+                            is PartData.FormItem -> {
+                                fileDescription = partData.value
                             }
 
+                            is PartData.FileItem -> {
+                                val fileBytes = partData.streamProvider().readBytes()
+                                val fileExtension =
+                                    partData.originalFileName?.takeLastWhile { it != '.' }
+
+                                if (!acceptedUploadExtension.contains(fileExtension)) {
+                                    throw UnsupportedFileExtensionException("File extension '$fileExtension' is not supported")
+                                }
+
 //                            fileName = UUID.randomUUID().toString() + "." + fileExtension
-                            fileName = partData.originalFileName ?: ("default$fileExtension")
-                            val folder = File(uploadPath)
-                            folder.mkdir()
-                            File("$uploadPath$fileName").writeBytes(fileBytes)
+                                fileName = partData.originalFileName ?: ("default$fileExtension")
+                                val folder = File(uploadPath)
+                                folder.mkdir()
+                                File("$uploadPath$fileName").writeBytes(fileBytes)
+                            }
+
+                            else -> {}
                         }
-
-                        else -> {}
+                        partData.dispose()
                     }
-                    partData.dispose()
-                }
-            } catch (e: Exception) {
-                File("upload/$fileName").delete()
+                } catch (e: Exception) {
+                    File("upload/$fileName").delete()
 
-                if (e is UnsupportedFileExtensionException) {
-                    call.respond(HttpStatusCode.NotAcceptable, e.message.toString())
+                    if (e is UnsupportedFileExtensionException) {
+                        call.respond(HttpStatusCode.NotAcceptable, e.message.toString())
+                    }
+                    call.respond(HttpStatusCode.InternalServerError, "Error")
                 }
-                call.respond(HttpStatusCode.InternalServerError, "Error")
+
+                call.respondText("$fileDescription is uploaded to 'uploads/$fileName'")
             }
+            get("download/{name}") {
+                val filename = call.parameters["name"]!!
+                val file = File("$uploadPath$filename")
 
-            call.respondText("$fileDescription is uploaded to 'uploads/$fileName'")
-        }
-        get("/api/v1/download/{name}") {
-            val filename = call.parameters["name"]!!
-            val file = File("$uploadPath$filename")
-
-            if (file.exists()) {
-                call.response.header("Content-Disposition", "attachment; filename=\"${file.name}\"")
-                call.response.header("HX-Redirect", "/api/v1/download/$filename")
-                call.respondFile(file)
-            } else call.respond(HttpStatusCode.NotFound)
+                if (file.exists()) {
+                    call.response.header("Content-Disposition", "attachment; filename=\"${file.name}\"")
+                    call.response.header("HX-Redirect", "/api/v1/download/$filename")
+                    call.respondFile(file)
+                } else call.respond(HttpStatusCode.NotFound)
+            }
         }
     }
 }
