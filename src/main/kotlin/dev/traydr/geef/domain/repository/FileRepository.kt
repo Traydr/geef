@@ -26,21 +26,22 @@ class FileRepository(minioClient: MinioClient) {
         }
     }
 
-    fun uploadFile(file: ByteArray, name: String, type: String) {
-        client.putObject(PutObjectArgs.builder()
+    fun uploadFile(file: ByteArray, name: String, type: String): String {
+        val response: ObjectWriteResponse = client.putObject(PutObjectArgs.builder()
             .bucket(bucketName)
             .`object`(name)
             .stream(file.inputStream(), file.size.toLong(), -1)
             .contentType("image/$type")
             .build())
+        return response.etag()
     }
 
     fun downloadFile(name: String): ByteArray {
         var foundFile: ByteArray = ByteArray(0)
         try {
-            val stream: InputStream = client.getObject(GetObjectArgs.builder().
-                bucket(bucketName).
-                `object`(name)
+            val stream: InputStream = client.getObject(GetObjectArgs.builder()
+                .bucket(bucketName)
+                .`object`(name)
                 .build())
             foundFile = stream.readBytes()
         } catch (e: Exception) {
