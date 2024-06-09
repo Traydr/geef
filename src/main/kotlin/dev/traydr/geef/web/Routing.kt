@@ -1,14 +1,11 @@
 package dev.traydr.geef.web
 
-import dev.traydr.geef.domain.GlobalPair
 import dev.traydr.geef.domain.exceptions.UnsupportedFileExtensionException
-import dev.traydr.geef.domain.service.GlobalPairsService
+import dev.traydr.geef.domain.repository.FileRepository
 import dev.traydr.geef.domain.service.TokenService
 import dev.traydr.geef.domain.service.UserService
 import dev.traydr.geef.utils.acceptedUploadExtension
 import dev.traydr.geef.utils.uploadPath
-import dev.traydr.geef.web.components.gsFormPost
-import dev.traydr.geef.web.components.gsFormPut
 import dev.traydr.geef.web.pages.*
 import io.ktor.http.*
 import io.ktor.http.content.*
@@ -20,16 +17,14 @@ import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import kotlinx.html.*
-import org.jsoup.Jsoup
-import org.jsoup.safety.Safelist
 import org.koin.ktor.ext.inject
 import java.io.File
+import java.util.*
 
 fun Application.configureRouting() {
     val tokenService by inject<TokenService>()
     val userService by inject<UserService>()
-    val globalPairsService by inject<GlobalPairsService>()
+    val fileRepository by inject<FileRepository>()
 
     install(StatusPages) {
         status(HttpStatusCode.NotFound) { call, status ->
@@ -100,11 +95,8 @@ fun Application.configureRouting() {
                                         throw UnsupportedFileExtensionException("File extension '$fileExtension' is not supported")
                                     }
 
-//                            fileName = UUID.randomUUID().toString() + "." + fileExtension
-                                    fileName = partData.originalFileName ?: ("default$fileExtension")
-                                    val folder = File(uploadPath)
-                                    folder.mkdir()
-                                    File("$uploadPath$fileName").writeBytes(fileBytes)
+                                    fileName = UUID.randomUUID().toString() + "." + fileExtension
+                                    val etag = fileRepository.uploadFile(fileBytes, fileName, fileExtension!!)
                                 }
 
                                 else -> {}
