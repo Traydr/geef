@@ -11,6 +11,7 @@ import java.util.UUID
 internal object Posts : LongIdTable() {
     val userId = reference("userId", Users.id)
     val publicUUID: Column<String> = varchar("publicUUID", 36).uniqueIndex()
+    val extension: Column<String> = varchar("extension", 64)
     val etag: Column<String> = varchar("etag", 255).uniqueIndex()
     val title: Column<String> = varchar("title", 40)
     val body: Column<String> = varchar("body", 255)
@@ -20,6 +21,7 @@ internal object Posts : LongIdTable() {
             id = row[Tokens.id].value,
             author = row[Tokens.userId].value,
             publicUUID = row[publicUUID],
+            extension = row[extension],
             etag = row[etag],
             title = row[title],
             body = row[body],

@@ -1,9 +1,11 @@
 package dev.traydr.geef.web
 
+import dev.traydr.geef.domain.Post
 import dev.traydr.geef.domain.Token
 import dev.traydr.geef.domain.User
 import dev.traydr.geef.domain.exceptions.UnsupportedFileExtensionException
 import dev.traydr.geef.domain.repository.FileRepository
+import dev.traydr.geef.domain.service.PostService
 import dev.traydr.geef.domain.service.TokenService
 import dev.traydr.geef.domain.service.UserService
 import dev.traydr.geef.utils.acceptedUploadExtension
@@ -28,6 +30,7 @@ fun Application.configureRouting() {
     val tokenService by inject<TokenService>()
     val userService by inject<UserService>()
     val fileRepository by inject<FileRepository>()
+    val postService by inject<PostService>()
 
     install(StatusPages) {
         status(HttpStatusCode.NotFound) { call, status ->
@@ -49,6 +52,48 @@ fun Application.configureRouting() {
                 indexPage()
             }
         }
+        get("/signup") {
+            call.respondHtml(HttpStatusCode.OK) {
+                signupPage()
+            }
+        }
+        get("/login") {
+            call.respondHtml(HttpStatusCode.OK) {
+                loginPage()
+            }
+        }
+        authenticate {
+            get("/discovery") {
+                call.respondHtml(HttpStatusCode.OK) {
+                    discoverPage()
+                }
+            }
+            get("/profile") {
+                val userId = call.sessions.get<UserSession>()?.id
+                if (userId != null) {
+                    call.respondHtml(HttpStatusCode.OK) {
+                        profilePage(userId, isOwnProfile = true)
+                    }
+                } else {
+                    call.respondHtml(HttpStatusCode.NotFound) {
+                        errorPage("User not found", 404)
+                    }
+                }
+            }
+            get("/profile/{uuid}") {
+                val uuid = call.parameters["uuid"]!!
+                val called: User? = userService.getUserByUUID(uuid)
+                if (called != null) {
+                    call.respondHtml(HttpStatusCode.OK) {
+                        profilePage(called.id!!)
+                    }
+                } else {
+                    call.respondHtml(HttpStatusCode.NotFound) {
+                        errorPage("User not found", 404)
+                    }
+                }
+            }
+        }
         get("/healthcheck") {
             call.respond(HttpStatusCode.OK)
         }
@@ -64,7 +109,7 @@ fun Application.configureRouting() {
         staticFiles("/css", File("src/main/resources/css/styles.css"))
         staticFiles("/", File("src/main/resources/static/"))
     }
-    // API routes
+// API routes
     routing {
         route("/api/v1/") {
             post("auth/signup") {
@@ -73,11 +118,11 @@ fun Application.configureRouting() {
             post("auth/login") {
                 call.respond(HttpStatusCode.NotImplemented)
             }
-            post("auth/logout") {
-                call.sessions.clear<UserSession>()
-                call.respondRedirect("/")
-            }
             authenticate {
+                post("auth/logout") {
+                    call.sessions.clear<UserSession>()
+                    call.respondRedirect("/")
+                }
                 post("upload") {
                     val userId = call.sessions.get<UserSession>()?.id
                     var fileDescription = ""
@@ -100,8 +145,22 @@ fun Application.configureRouting() {
                                         throw UnsupportedFileExtensionException("File extension '$fileExtension' is not supported")
                                     }
 
-                                    fileName = UUID.randomUUID().toString() + "." + fileExtension
-                                    val etag = fileRepository.uploadFile(fileBytes, fileName, fileExtension!!)
+                                    val fileUUID = UUID.randomUUID().toString()
+                                    fileName = "$fileUUID.$fileExtension"
+                                    val etag = fileRepository.uploadFile(
+                                        fileBytes,
+                                        fileName,
+                                        fileExtension!!
+                                    )
+                                    val created = Post(
+                                        publicUUID = fileUUID,
+                                        extension = fileExtension,
+                                        etag = etag,
+                                        author = userId,
+                                        title = fileDescription,
+                                        body = ""
+                                    )
+                                    postService.createPost(created)
                                 }
 
                                 else -> {}
@@ -109,24 +168,25 @@ fun Application.configureRouting() {
                             partData.dispose()
                         }
                     } catch (e: Exception) {
-                        File("upload/$fileName").delete()
-
+                        fileRepository.deleteFile(fileName)
                         if (e is UnsupportedFileExtensionException) {
                             call.respond(HttpStatusCode.NotAcceptable, e.message.toString())
                         }
                         call.respond(HttpStatusCode.InternalServerError, "Error")
                     }
-
-                    call.respondText("$fileDescription is uploaded to 'uploads/$fileName'")
+                    call.respondText("$fileName has been uploaded")
                 }
                 get("download/{name}") {
                     val filename = call.parameters["name"]!!
-                    val file = File("$uploadPath$filename")
+                    val file = fileRepository.downloadFile(filename)
 
-                    if (file.exists()) {
-                        call.response.header("Content-Disposition", "attachment; filename=\"${file.name}\"")
+                    if (file.isNotEmpty()) {
+                        call.response.header(
+                            "Content-Disposition",
+                            "attachment; filename=\"${filename}\""
+                        )
                         call.response.header("HX-Redirect", "/api/v1/download/$filename")
-                        call.respondFile(file)
+                        call.respondBytes() { file }
                     } else call.respond(HttpStatusCode.NotFound)
                 }
             }

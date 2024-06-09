@@ -49,4 +49,11 @@ class FileRepository(minioClient: MinioClient) {
         }
         return foundFile
     }
+
+    fun deleteFile(name: String) {
+        client.removeObject(RemoveObjectArgs.builder()
+            .bucket(bucketName)
+            .`object`(name)
+            .build())
+    }
 }

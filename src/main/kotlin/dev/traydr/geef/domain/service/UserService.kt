@@ -18,6 +18,10 @@ class UserService(private val userRepository: UserRepository) {
         return user.copy()
     }
 
+    fun getUserByUUID(uuid: String): User? {
+        return userRepository.findByUUID(uuid)
+    }
+
     fun getAllUsers(): List<User> {
         return userRepository.getAll()
     }

@@ -2,8 +2,10 @@ package dev.traydr.geef
 
 import dev.traydr.geef.config.DbConfig
 import dev.traydr.geef.domain.repository.FileRepository
+import dev.traydr.geef.domain.repository.PostRepository
 import dev.traydr.geef.domain.repository.TokenRepository
 import dev.traydr.geef.domain.repository.UserRepository
+import dev.traydr.geef.domain.service.PostService
 import dev.traydr.geef.domain.service.TokenService
 import dev.traydr.geef.domain.service.UserService
 import dev.traydr.geef.web.configureRouting
@@ -39,11 +41,13 @@ fun Application.module() {
     val repoModule = org.koin.dsl.module {
         single { UserRepository() }
         single { TokenRepository() }
+        single { PostRepository() }
     }
 
     val serviceModule = org.koin.dsl.module {
         single { TokenService(get(), get()) }
         single { UserService(get()) }
+        single { PostService(get()) }
     }
 
     val minioUrl = System.getenv("MINIO_URL")?: "0.0.0.0"

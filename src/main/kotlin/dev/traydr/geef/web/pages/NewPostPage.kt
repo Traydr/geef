@@ -7,12 +7,12 @@ import dev.traydr.geef.web.components.wrapper
 import kotlinx.html.HTML
 import kotlinx.html.body
 
-fun HTML.profilePage(userId: Long, isOwnProfile: Boolean = false) {
+fun HTML.newPostPage() {
     attributes["data-theme"] = "dark"
-    header("GEEF | Profile", "Profile")
+    header("GEEF | New Post", "New Post on Geef")
     body {
         navbar()
-        wrapper("Profile", hideTitle = true) {
+        wrapper("New Post") {
         }
         footer()
     }
