@@ -1,7 +1,6 @@
 package dev.traydr.geef.web
 
 import dev.traydr.geef.domain.Post
-import dev.traydr.geef.domain.Token
 import dev.traydr.geef.domain.User
 import dev.traydr.geef.domain.exceptions.UnsupportedFileExtensionException
 import dev.traydr.geef.domain.repository.FileRepository
@@ -9,7 +8,6 @@ import dev.traydr.geef.domain.service.PostService
 import dev.traydr.geef.domain.service.TokenService
 import dev.traydr.geef.domain.service.UserService
 import dev.traydr.geef.utils.acceptedUploadExtension
-import dev.traydr.geef.utils.uploadPath
 import dev.traydr.geef.web.pages.*
 import io.ktor.http.*
 import io.ktor.http.content.*
@@ -62,10 +60,10 @@ fun Application.configureRouting() {
                 loginPage()
             }
         }
-        authenticate {
+        authenticate("auth-session") {
             get("/discovery") {
                 call.respondHtml(HttpStatusCode.OK) {
-                    discoverPage()
+                    discoverPage(userService.getAllUsers())
                 }
             }
             get("/profile") {
@@ -113,16 +111,33 @@ fun Application.configureRouting() {
     routing {
         route("/api/v1/") {
             post("auth/signup") {
-                call.respond(HttpStatusCode.NotImplemented)
+                val details = call.receiveParameters()
+                val user = User(
+                    publicUUID = "",
+                    email = details["email"]!!,
+                    username = details["username"]!!,
+                    password = details["password"]!!
+                )
+                userService.create(user)
+                call.respondRedirect("/login")
             }
-            post("auth/login") {
-                call.respond(HttpStatusCode.NotImplemented)
-            }
-            authenticate {
-                post("auth/logout") {
-                    call.sessions.clear<UserSession>()
-                    call.respondRedirect("/")
+            authenticate("auth-form") {
+                post("auth/login") {
+                    val email = call.principal<UserIdPrincipal>()?.name.toString()
+                    val user = userService.getUserbyEmail(email)
+                    var token = tokenService.getTokenForEmail(email)
+                    tokenService.refreshToken(token)
+                    token = tokenService.getTokenForEmail(email)
+
+                    call.sessions.set(UserSession(id = user?.id!!, value = token.value!!))
+                    call.respondRedirect("/discovery")
                 }
+            }
+            post("auth/logout") {
+                call.sessions.clear<UserSession>()
+                call.respondRedirect("/")
+            }
+            authenticate("auth-session") {
                 post("upload") {
                     val userId = call.sessions.get<UserSession>()?.id
                     var fileDescription = ""

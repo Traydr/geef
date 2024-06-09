@@ -9,6 +9,9 @@ fun HTML.indexPage() {
     body {
         navbar()
         wrapper("Home") {
+            p {
+                +"Enjoy Geef, a place where you can share your images"
+            }
         }
         footer()
     }
