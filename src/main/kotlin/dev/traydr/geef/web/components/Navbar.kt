@@ -12,7 +12,7 @@ fun FlowContent.navbar() = nav {
         a {
             classes = setOf("btn", "btn-ghost", "text-xl", "text-bold")
             href = "/"
-            +"Ktor Example"
+            +"Geef"
         }
     }
 
@@ -22,20 +22,26 @@ fun FlowContent.navbar() = nav {
             classes = setOf("menu", "menu-horizontal", "px-1")
             li {
                 a {
-                    href = "/images"
-                    +"Images"
+                    href = "/discovery"
+                    +"Discovery"
                 }
             }
             li {
                 a {
-                    href = "/db"
-                    +"Db"
+                    href = "/profile"
+                    +"Profile"
                 }
             }
             li {
                 a {
-                    href = "/ext-api"
-                    +"Api"
+                    href = "/login"
+                    +"Login"
+                }
+            }
+            li {
+                a {
+                    href = "/Signup"
+                    +"Signup"
                 }
             }
         }

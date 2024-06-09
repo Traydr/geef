@@ -9,7 +9,7 @@ import kotlinx.html.*
 
 fun HTML.errorPage(text: String, httpError: Int) {
     attributes["data-theme"] = "dark"
-    header("KT | Error $httpError", text)
+    header("GEEF | Error $httpError", text)
     body {
         classes = setOf()
         navbar()

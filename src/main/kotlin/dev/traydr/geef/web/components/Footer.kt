@@ -26,7 +26,7 @@ fun FlowContent.footer() = footer {
         div {
             classes = setOf("grid", "grid-flow-col", "gap-4")
             a {
-                href = "https://github.com/Traydr/ktor-example"
+                href = "https://github.com/Traydr/geef"
                 img {
                     classes = setOf("")
                     src = "/logos/github-mark-white.svg"
