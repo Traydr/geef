@@ -39,6 +39,7 @@ up to 300 users. Up to 50 files per user.
     - [ ] /profile gets your own profile
     - [ ] /profile/{public_user_id} gets someone else's profile
   - [ ] Discovery page (List of users)
+  - [ ] Single image page
 - [ ] APIs
   - [ ] Auth endpoints
   - [ ] Modify or rewrite image endpoints
