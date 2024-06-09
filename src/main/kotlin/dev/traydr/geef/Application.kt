@@ -1,6 +1,7 @@
 package dev.traydr.geef
 
 import dev.traydr.geef.config.DbConfig
+import dev.traydr.geef.domain.repository.FileRepository
 import dev.traydr.geef.domain.repository.GlobalPairsRepository
 import dev.traydr.geef.domain.repository.TokenRepository
 import dev.traydr.geef.domain.repository.UserRepository
@@ -13,7 +14,10 @@ import dev.traydr.geef.web.configureSerialization
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
+import io.minio.MakeBucketArgs
 import org.koin.ktor.plugin.Koin
+import io.minio.MinioClient;
+import java.util.UUID
 
 fun main() {
     val port = (System.getenv("PORT")?: "8080").toInt()
@@ -46,8 +50,21 @@ fun Application.module() {
         single { GlobalPairsService(get()) }
     }
 
+    val minioUrl = System.getenv("MINIO_URL")?: "0.0.0.0"
+    val minioUsername = System.getenv("MINIO_USERNAME")?: "minio"
+    val minioPassword = System.getenv("MINIO_PASSWORD")?: ""
+
+    val minioClient: MinioClient = MinioClient.builder()
+        .endpoint(minioUrl)
+        .credentials(minioUsername, minioPassword)
+        .build()
+
+    val fileModule = org.koin.dsl.module {
+        single { FileRepository(minioClient) }
+    }
+
     install(Koin) {
-        modules(repoModule, serviceModule)
+        modules(repoModule, serviceModule, fileModule)
     }
 
     val postgresIp = System.getenv("PG_IP")?: "0.0.0.0"
@@ -59,10 +76,6 @@ fun Application.module() {
         postgresUsername,
         postgresPassword
     )
-
-    val minioUrl = System.getenv("MINIO_URL")?: "0.0.0.0"
-    val minioUsername = System.getenv("MINIO_USERNAME")?: "minio"
-    val minioPassword = System.getenv("MINIO_PASSWORD")?: ""
 
     configureSecurity()
     configureSerialization()

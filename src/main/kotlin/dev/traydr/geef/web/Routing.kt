@@ -13,6 +13,7 @@ import dev.traydr.geef.web.pages.*
 import io.ktor.http.*
 import io.ktor.http.content.*
 import io.ktor.server.application.*
+import io.ktor.server.auth.*
 import io.ktor.server.html.*
 import io.ktor.server.http.content.*
 import io.ktor.server.plugins.statuspages.*
@@ -68,58 +69,69 @@ fun Application.configureRouting() {
     // API routes
     routing {
         route("/api/v1/") {
-            post("upload") {
-                var fileDescription = ""
-                var fileName = ""
-                val multipartData = call.receiveMultipart()
+            post("auth/signup") {
+                call.respond(HttpStatusCode.NotImplemented)
+            }
+            post("auth/login") {
+                call.respond(HttpStatusCode.NotImplemented)
+            }
+            post("auth/logout") {
+                call.respond(HttpStatusCode.NotImplemented)
+            }
+            authenticate {
+                post("upload") {
+                    var fileDescription = ""
+                    var fileName = ""
+                    val multipartData = call.receiveMultipart()
 
-                try {
-                    multipartData.forEachPart { partData ->
-                        when (partData) {
-                            is PartData.FormItem -> {
-                                fileDescription = partData.value
-                            }
-
-                            is PartData.FileItem -> {
-                                val fileBytes = partData.streamProvider().readBytes()
-                                val fileExtension =
-                                    partData.originalFileName?.takeLastWhile { it != '.' }
-
-                                if (!acceptedUploadExtension.contains(fileExtension)) {
-                                    throw UnsupportedFileExtensionException("File extension '$fileExtension' is not supported")
+                    try {
+                        multipartData.forEachPart { partData ->
+                            when (partData) {
+                                is PartData.FormItem -> {
+                                    fileDescription = partData.value
                                 }
 
+                                is PartData.FileItem -> {
+                                    val fileBytes = partData.streamProvider().readBytes()
+                                    val fileExtension =
+                                        partData.originalFileName?.takeLastWhile { it != '.' }
+
+                                    if (!acceptedUploadExtension.contains(fileExtension)) {
+                                        throw UnsupportedFileExtensionException("File extension '$fileExtension' is not supported")
+                                    }
+
 //                            fileName = UUID.randomUUID().toString() + "." + fileExtension
-                                fileName = partData.originalFileName ?: ("default$fileExtension")
-                                val folder = File(uploadPath)
-                                folder.mkdir()
-                                File("$uploadPath$fileName").writeBytes(fileBytes)
+                                    fileName = partData.originalFileName ?: ("default$fileExtension")
+                                    val folder = File(uploadPath)
+                                    folder.mkdir()
+                                    File("$uploadPath$fileName").writeBytes(fileBytes)
+                                }
+
+                                else -> {}
                             }
-
-                            else -> {}
+                            partData.dispose()
                         }
-                        partData.dispose()
-                    }
-                } catch (e: Exception) {
-                    File("upload/$fileName").delete()
+                    } catch (e: Exception) {
+                        File("upload/$fileName").delete()
 
-                    if (e is UnsupportedFileExtensionException) {
-                        call.respond(HttpStatusCode.NotAcceptable, e.message.toString())
+                        if (e is UnsupportedFileExtensionException) {
+                            call.respond(HttpStatusCode.NotAcceptable, e.message.toString())
+                        }
+                        call.respond(HttpStatusCode.InternalServerError, "Error")
                     }
-                    call.respond(HttpStatusCode.InternalServerError, "Error")
+
+                    call.respondText("$fileDescription is uploaded to 'uploads/$fileName'")
                 }
+                get("download/{name}") {
+                    val filename = call.parameters["name"]!!
+                    val file = File("$uploadPath$filename")
 
-                call.respondText("$fileDescription is uploaded to 'uploads/$fileName'")
-            }
-            get("download/{name}") {
-                val filename = call.parameters["name"]!!
-                val file = File("$uploadPath$filename")
-
-                if (file.exists()) {
-                    call.response.header("Content-Disposition", "attachment; filename=\"${file.name}\"")
-                    call.response.header("HX-Redirect", "/api/v1/download/$filename")
-                    call.respondFile(file)
-                } else call.respond(HttpStatusCode.NotFound)
+                    if (file.exists()) {
+                        call.response.header("Content-Disposition", "attachment; filename=\"${file.name}\"")
+                        call.response.header("HX-Redirect", "/api/v1/download/$filename")
+                        call.respondFile(file)
+                    } else call.respond(HttpStatusCode.NotFound)
+                }
             }
         }
     }
