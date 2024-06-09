@@ -9,10 +9,11 @@ import io.ktor.server.sessions.*
 import org.koin.ktor.ext.inject
 import java.time.LocalDateTime
 
+data class UserSession(val id: Long, val value: String) : Principal
+
 fun Application.configureSecurity() {
     val tokenService by inject<TokenService>()
 
-    data class UserSession(val id: Long, val value: String) : Principal
     install(Sessions) {
         cookie<UserSession>("user_session") {
             cookie.path = "/"

@@ -67,4 +67,8 @@ class TokenService(
     fun getTokenById(id: Long): Token? {
         return tokenRepository.findTokenById(id)
     }
+
+    fun getUserIdByToken(token: String): Long? {
+        return tokenRepository.findTokenByToken(token)?.uid
+    }
 }

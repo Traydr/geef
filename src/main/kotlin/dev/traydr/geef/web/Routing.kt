@@ -1,5 +1,7 @@
 package dev.traydr.geef.web
 
+import dev.traydr.geef.domain.Token
+import dev.traydr.geef.domain.User
 import dev.traydr.geef.domain.exceptions.UnsupportedFileExtensionException
 import dev.traydr.geef.domain.repository.FileRepository
 import dev.traydr.geef.domain.service.TokenService
@@ -17,6 +19,7 @@ import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import io.ktor.server.sessions.*
 import org.koin.ktor.ext.inject
 import java.io.File
 import java.util.*
@@ -71,10 +74,12 @@ fun Application.configureRouting() {
                 call.respond(HttpStatusCode.NotImplemented)
             }
             post("auth/logout") {
-                call.respond(HttpStatusCode.NotImplemented)
+                call.sessions.clear<UserSession>()
+                call.respondRedirect("/")
             }
             authenticate {
                 post("upload") {
+                    val userId = call.sessions.get<UserSession>()?.id
                     var fileDescription = ""
                     var fileName = ""
                     val multipartData = call.receiveMultipart()

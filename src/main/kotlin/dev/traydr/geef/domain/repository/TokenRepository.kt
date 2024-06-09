@@ -50,7 +50,7 @@ class TokenRepository {
     fun findTokenById(id: Long): Token? {
         return transaction {
             Tokens.select {
-                Tokens.id eq id
+                Tokens.userId eq id
             }
                 .map { Tokens.toDomain(it) }
                 .firstOrNull()
