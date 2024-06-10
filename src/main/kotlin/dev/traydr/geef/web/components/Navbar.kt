@@ -1,10 +1,11 @@
 package dev.traydr.geef.web.components
 
+import dev.traydr.geef.utils.hxGet
 import kotlinx.html.FlowContent
 import kotlinx.html.classes
 import kotlinx.html.*
 
-fun FlowContent.navbar() = nav {
+fun FlowContent.navbar(isAuthenticated: Boolean = false) = nav {
     classes = setOf("navbar", "bg-base-100/75", "outline", "outline-offset-0", "outline-blue-800")
 
     div {
@@ -32,16 +33,25 @@ fun FlowContent.navbar() = nav {
                     +"Profile"
                 }
             }
-            li {
-                a {
-                    href = "/login"
-                    +"Login"
+            if (!isAuthenticated) {
+                li {
+                    a {
+                        href = "/login"
+                        +"Login"
+                    }
                 }
-            }
-            li {
-                a {
-                    href = "/Signup"
-                    +"Signup"
+                li {
+                    a {
+                        href = "/signup"
+                        +"Signup"
+                    }
+                }
+            } else {
+                li {
+                    a {
+                        hxGet("/api/v1/auth/logout")
+                        +"Logout"
+                    }
                 }
             }
         }
