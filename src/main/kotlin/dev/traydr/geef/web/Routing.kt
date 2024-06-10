@@ -20,6 +20,10 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
+import kotlinx.html.body
+import kotlinx.html.classes
+import kotlinx.html.div
+import kotlinx.html.img
 import org.koin.ktor.ext.inject
 import java.io.File
 import java.util.*
@@ -69,8 +73,11 @@ fun Application.configureRouting() {
             get("/profile") {
                 val userId = call.sessions.get<UserSession>()?.id
                 if (userId != null) {
+                    val user = userService.getUserById(userId)
                     call.respondHtml(HttpStatusCode.OK) {
-                        profilePage(userId, isOwnProfile = true)
+                        if (user != null) {
+                            profilePage(user.publicUUID, isOwnProfile = true)
+                        }
                     }
                 } else {
                     call.respondHtml(HttpStatusCode.NotFound) {
@@ -83,7 +90,7 @@ fun Application.configureRouting() {
                 val called: User? = userService.getUserByUUID(uuid)
                 if (called != null) {
                     call.respondHtml(HttpStatusCode.OK) {
-                        profilePage(called.id!!)
+                        profilePage(uuid)
                     }
                 } else {
                     call.respondHtml(HttpStatusCode.NotFound) {
@@ -203,6 +210,27 @@ fun Application.configureRouting() {
                         call.response.header("HX-Redirect", "/api/v1/download/$filename")
                         call.respondBytes() { file }
                     } else call.respond(HttpStatusCode.NotFound)
+                }
+                get("profile/{uuid}/images") {
+                    val userUUID = call.parameters["uuid"]!!
+                    val user = userService.getUserByUUID(userUUID)
+                    val posts = postService.getAllPostsByUser(user?.id!!)
+
+                    call.respondHtml(HttpStatusCode.OK) {
+                        body {
+                            for (post in posts) {
+                                div {
+                                    img {
+                                        classes = setOf("")
+                                        src = "/download/${post.publicUUID + "." + post.extension}"
+                                        alt = "User created image"
+                                        width = "100"
+                                        height = "100"
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }

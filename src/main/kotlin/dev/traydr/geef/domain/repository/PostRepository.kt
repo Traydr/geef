@@ -56,6 +56,7 @@ class PostRepository {
             Posts.insertAndGetId { row ->
                 row[userId] = post.author!!
                 row[publicUUID] = UUID.randomUUID().toString()
+                row[extension] = post.extension!!
                 row[etag] = post.etag!!
                 row[title] = post.title!!
                 row[body] = post.body!!

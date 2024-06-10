@@ -47,6 +47,14 @@ class UserRepository {
         }
     }
 
+    fun findById(id: Long): User? {
+        return transaction {
+            Users.select { Users.id eq id }
+                .map { Users.toDomain(it) }
+                .firstOrNull()
+        }
+    }
+
     fun findByUUID(uuid: String): User? {
         return transaction {
             Users.select { Users.publicUUID eq uuid }
