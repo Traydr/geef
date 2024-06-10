@@ -226,7 +226,7 @@ fun Application.configureRouting() {
                                 div {
                                     img {
                                         classes = setOf("")
-                                        src = "api/v1/download/${post.publicUUID}.png"
+                                        src = "/api/v1/download/${post.publicUUID}.png"
                                         alt = "User created image"
                                         width = "250"
                                         height = "250"
