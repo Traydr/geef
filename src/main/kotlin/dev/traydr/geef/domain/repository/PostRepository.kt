@@ -55,7 +55,7 @@ class PostRepository {
         return transaction {
             Posts.insertAndGetId { row ->
                 row[userId] = post.author!!
-                row[publicUUID] = UUID.randomUUID().toString()
+                row[publicUUID] = post.publicUUID
                 row[extension] = post.extension!!
                 row[etag] = post.etag!!
                 row[title] = post.title!!

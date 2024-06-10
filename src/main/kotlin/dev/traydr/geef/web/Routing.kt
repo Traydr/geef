@@ -170,11 +170,13 @@ fun Application.configureRouting() {
 
                                     val fileUUID = UUID.randomUUID().toString()
                                     fileName = "$fileUUID.$fileExtension"
+                                    println("Saving file with UUID $fileUUID")
                                     val etag = fileRepository.uploadFile(
                                         fileBytes,
                                         fileName,
                                         fileExtension!!
                                     )
+                                    println("Creating DB POST")
                                     val created = Post(
                                         publicUUID = fileUUID,
                                         extension = fileExtension,
@@ -183,6 +185,7 @@ fun Application.configureRouting() {
                                         title = fileDescription,
                                         body = ""
                                     )
+                                    println("New DB POST")
                                     postService.createPost(created)
                                 }
 
@@ -215,9 +218,7 @@ fun Application.configureRouting() {
                 get("profile/{uuid}/images") {
                     val userUUID = call.parameters["uuid"]!!
                     val user = userService.getUserByUUID(userUUID)
-                    println("\n\n\nGetUser")
                     val posts = postService.getAllPostsByUser(user?.id!!)
-                    println("\n\n\nGetPosts")
 
                     call.respondHtml(HttpStatusCode.OK) {
                         body {
@@ -225,10 +226,10 @@ fun Application.configureRouting() {
                                 div {
                                     img {
                                         classes = setOf("")
-                                        src = "api/v1/download/${post.publicUUID + "." + post.extension}"
+                                        src = "api/v1/download/${post.publicUUID}.png"
                                         alt = "User created image"
-                                        width = "100"
-                                        height = "100"
+                                        width = "250"
+                                        height = "250"
                                     }
                                 }
                             }

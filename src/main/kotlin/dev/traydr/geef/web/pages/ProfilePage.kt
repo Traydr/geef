@@ -47,8 +47,8 @@ fun HTML.profilePage(uuid: String, isOwnProfile: Boolean = false) {
             }
             div {
                 classes = setOf("grid", "justify-items-center", "grid-cols-4", "gap-4")
+                id="images"
                 div {
-                    id="images"
                     hxGet("/api/v1/profile/${uuid}/images")
                     hxSwap("innerHTML")
                     hxTarget("#images")
