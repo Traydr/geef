@@ -18,8 +18,8 @@ internal object Posts : LongIdTable() {
 
     fun toDomain(row: ResultRow): Post {
         return Post(
-            id = row[Tokens.id].value,
-            author = row[Tokens.userId].value,
+            id = row[Posts.id].value,
+            author = row[Posts.userId].value,
             publicUUID = row[publicUUID],
             extension = row[extension],
             etag = row[etag],

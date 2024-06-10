@@ -9,6 +9,7 @@ class PostService(private val postRepository: PostRepository) {
     }
 
     fun getAllPostsByUser(userId: Long): List<Post> {
+        println("\n\n\n All Posts by user $userId")
         return postRepository.findAllPostsByUserId(userId)
     }
 

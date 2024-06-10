@@ -52,6 +52,7 @@ fun HTML.profilePage(uuid: String, isOwnProfile: Boolean = false) {
                     hxGet("/api/v1/profile/${uuid}/images")
                     hxSwap("innerHTML")
                     hxTarget("#images")
+                    hxTrigger("load")
                 }
             }
             footer()

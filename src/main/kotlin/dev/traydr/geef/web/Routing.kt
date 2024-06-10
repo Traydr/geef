@@ -142,6 +142,7 @@ fun Application.configureRouting() {
             }
             post("auth/logout") {
                 call.sessions.clear<UserSession>()
+                call.response.header("HX-Redirect", "/login")
                 call.respondRedirect("/")
             }
             authenticate("auth-session") {
@@ -203,18 +204,20 @@ fun Application.configureRouting() {
                     val file = fileRepository.downloadFile(filename)
 
                     if (file.isNotEmpty()) {
-                        call.response.header(
-                            "Content-Disposition",
-                            "attachment; filename=\"${filename}\""
-                        )
-                        call.response.header("HX-Redirect", "/api/v1/download/$filename")
-                        call.respondBytes() { file }
+//                        call.response.header(
+//                            "Content-Disposition",
+//                            "attachment; filename=\"${filename}\""
+//                        )
+//                        call.response.header("HX-Redirect", "/api/v1/download/$filename")
+                        call.respondBytes() {file }
                     } else call.respond(HttpStatusCode.NotFound)
                 }
                 get("profile/{uuid}/images") {
                     val userUUID = call.parameters["uuid"]!!
                     val user = userService.getUserByUUID(userUUID)
+                    println("\n\n\nGetUser")
                     val posts = postService.getAllPostsByUser(user?.id!!)
+                    println("\n\n\nGetPosts")
 
                     call.respondHtml(HttpStatusCode.OK) {
                         body {
@@ -222,7 +225,7 @@ fun Application.configureRouting() {
                                 div {
                                     img {
                                         classes = setOf("")
-                                        src = "/download/${post.publicUUID + "." + post.extension}"
+                                        src = "api/v1/download/${post.publicUUID + "." + post.extension}"
                                         alt = "User created image"
                                         width = "100"
                                         height = "100"
